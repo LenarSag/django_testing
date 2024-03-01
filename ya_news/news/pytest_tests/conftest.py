@@ -5,12 +5,10 @@ from django.test.client import Client
 from django.conf import settings
 from django.urls import reverse
 
-# Импортируем модель заметки, чтобы создать экземпляр.
 from news.models import News, Comment
 
 
 @pytest.fixture
-# Используем встроенную фикстуру для модели пользователей django_user_model.
 def author(django_user_model):
     return django_user_model.objects.create(username="Автор")
 
@@ -21,23 +19,22 @@ def not_author(django_user_model):
 
 
 @pytest.fixture
-def author_client(author):  # Вызываем фикстуру автора.
-    # Создаём новый экземпляр клиента, чтобы не менять глобальный.
+def author_client(author):
     client = Client()
-    client.force_login(author)  # Логиним автора в клиенте.
+    client.force_login(author)
     return client
 
 
 @pytest.fixture
 def not_author_client(not_author):
     client = Client()
-    client.force_login(not_author)  # Логиним обычного пользователя в клиенте.
+    client.force_login(not_author)
     return client
 
 
 @pytest.fixture
 def news():
-    news = News.objects.create(  # Создаём объект заметки.
+    news = News.objects.create(
         title="Заголовок",
         text="Текст заметки",
         date=datetime.today(),
@@ -47,7 +44,7 @@ def news():
 
 @pytest.fixture
 def comment(author, news):
-    comment = Comment.objects.create(  # Создаём объект комментария.
+    comment = Comment.objects.create(
         news=news,
         text="Текст комментария",
         author=author,
@@ -61,14 +58,10 @@ def news_id_for_args(news):
 
 
 @pytest.fixture
-# Фикстура запрашивает другую фикстуру создания заметки.
 def comment_id_for_args(comment):
-    # И возвращает кортеж, который содержит slug заметки.
-    # На то, что это кортеж, указывает запятая в конце выражения.
     return (comment.id,)
 
 
-# Добавляем фикстуру form_data
 @pytest.fixture
 def comment_form_data(author, news):
     return {

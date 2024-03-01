@@ -1,10 +1,3 @@
-# DONE Анонимный пользователь не может отправить комментарий.
-# DONE Авторизованный пользователь может отправить комментарий.
-# DONE Если комментарий содержит запрещённые слова, он не будет опубликован, а форма вернёт ошибку.
-# DONE Авторизованный пользователь может редактировать или удалять свои комментарии.
-# DONE Авторизованный пользователь не может редактировать или удалять чужие комментарии.
-
-
 from http import HTTPStatus
 import pytest
 
@@ -17,7 +10,11 @@ from news.models import Comment
 NEW_COMMENT = "Самый новый комментарий"
 
 
-def test_anonymous_user_cant_create_comment(comment_form_data, detail_url, client):
+def test_anonymous_user_cant_create_comment(
+        comment_form_data,
+        detail_url,
+        client
+):
     client.post(detail_url, data=comment_form_data)
     comments_count = Comment.objects.count()
     assert comments_count == 0
@@ -50,7 +47,10 @@ def test_author_can_delete_comment(delete_url, detail_url, author_client):
     assert comments_count == 0
 
 
-def test_user_cant_delete_comment_of_another_user(delete_url, not_author_client):
+def test_user_cant_delete_comment_of_another_user(
+        delete_url,
+        not_author_client
+):
     response = not_author_client.delete(delete_url)
     assert response.status_code == HTTPStatus.NOT_FOUND
     comments_count = Comment.objects.count()

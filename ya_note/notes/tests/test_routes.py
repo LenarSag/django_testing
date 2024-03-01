@@ -3,8 +3,6 @@ from http import HTTPStatus
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth.models import AnonymousUser
-
 
 from notes.models import Note
 
@@ -18,10 +16,13 @@ class TestRoutes(TestCase):
         cls.author = User.objects.create(username="Лев Толстой")
         cls.reader = User.objects.create(username="Читатель простой")
         cls.notes = Note.objects.create(
-            title="Заголовок", text="Текст", slug="zagolovok", author=cls.author
+            title="Заголовок",
+            text="Текст",
+            slug="zagolovok",
+            author=cls.author
         )
 
-    def test_pages_availability(self):
+    def test_pages_availability_for_anonymous_user(self):
         urls = (
             ("notes:home", None),
             ("users:login", None),
@@ -35,13 +36,12 @@ class TestRoutes(TestCase):
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
-    def test_detail_and_edit_available(self):
+    def test_pages_availability_for_auth_user(self):
         users_statuses = (
             (self.author, HTTPStatus.OK),
             (self.reader, HTTPStatus.NOT_FOUND),
         )
         for user, status in users_statuses:
-            # Логиним в клиенте:
             self.client.force_login(user)
             names = (
                 ("notes:detail", (self.notes.slug,)),
