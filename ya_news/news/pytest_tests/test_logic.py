@@ -1,13 +1,9 @@
 from http import HTTPStatus
-import pytest
 
 from pytest_django.asserts import assertRedirects, assertFormError
 
 from news.forms import BAD_WORDS, WARNING
 from news.models import Comment
-
-
-NEW_COMMENT = "Самый новый комментарий"
 
 
 def test_anonymous_user_cant_create_comment(
@@ -31,7 +27,6 @@ def test_user_can_create_comment(comment_form_data, detail_url, author_client):
     assert comment.author == comment_form_data["author"]
 
 
-@pytest.mark.django_db
 def test_user_cant_use_bad_words(detail_url, author_client):
     bad_words_data = {"text": f"Какой-то текст, {BAD_WORDS[0]}, еще текст"}
     response = author_client.post(detail_url, data=bad_words_data)
@@ -58,13 +53,12 @@ def test_user_cant_delete_comment_of_another_user(
 
 
 def test_author_can_edit_comment(
-    edit_url, detail_url, comment, comment_form_data, author_client
+    edit_url, detail_url, comment, edit_comment_form_data, author_client
 ):
-    comment_form_data["text"] = NEW_COMMENT
-    response = author_client.post(edit_url, data=comment_form_data)
+    response = author_client.post(edit_url, data=edit_comment_form_data)
     assertRedirects(response, detail_url + "#comments")
     comment.refresh_from_db()
-    assert comment.text == NEW_COMMENT
+    assert comment.text == edit_comment_form_data['text']
 
 
 def test_user_cant_edit_comment_of_another_user(

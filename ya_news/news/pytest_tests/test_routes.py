@@ -1,27 +1,25 @@
 from http import HTTPStatus
-import pytest
 
-from django.urls import reverse
+import pytest
 from pytest_django.asserts import assertRedirects
 
 
-@pytest.mark.django_db
 @pytest.mark.parametrize(
-    "name, args",
-    [
-        ("news:home", None),
-        ("users:login", None),
-        ("users:logout", None),
-        ("users:signup", None),
-        ("news:detail", pytest.lazy_fixture("news_id_for_args")),
-    ],
+    "url_fixture",
+    (
+        "home_url",
+        "login_url",
+        "logout_url",
+        "signup_url",
+        "detail_url",
+    )
 )
 def test_pages_availability_for_anonymous_user(
     client,
-    name,
-    args,
+    request,
+    url_fixture,
 ):
-    url = reverse(name, args=args)
+    url = request.getfixturevalue(url_fixture)
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
 
@@ -34,30 +32,30 @@ def test_pages_availability_for_anonymous_user(
     ),
 )
 @pytest.mark.parametrize(
-    "name, args",
+    "url_fixture",
     (
-        ("news:edit", pytest.lazy_fixture("comment_id_for_args")),
-        ("news:delete", pytest.lazy_fixture("comment_id_for_args")),
-    ),
+        "edit_url",
+        "delete_url",
+    )
 )
 def test_pages_availability_for_different_users(
-    parametrized_client, name, args, expected_status
+    request, parametrized_client, url_fixture, expected_status
 ):
-    url = reverse(name, args=args)
+    url = request.getfixturevalue(url_fixture)
     response = parametrized_client.get(url)
     assert response.status_code == expected_status
 
 
 @pytest.mark.parametrize(
-    "name, args",
+    "url_fixture",
     (
-        ("news:edit", pytest.lazy_fixture("comment_id_for_args")),
-        ("news:delete", pytest.lazy_fixture("comment_id_for_args")),
-    ),
+        "edit_url",
+        "delete_url",
+    )
 )
-def test_redirects(client, name, args):
-    login_url = reverse("users:login")
-    url = reverse(name, args=args)
-    expected_url = f"{login_url}?next={url}"
+def test_redirects(client, request, url_fixture, login_url):
+    redirect_login_url = login_url
+    url = request.getfixturevalue(url_fixture)
+    expected_url = f"{redirect_login_url}?next={url}"
     response = client.get(url)
     assertRedirects(response, expected_url)
