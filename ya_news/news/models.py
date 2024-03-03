@@ -7,7 +7,7 @@ from django.db import models
 class News(models.Model):
     title = models.CharField(max_length=50)
     text = models.TextField()
-    date = models.DateField(default=datetime.today)  # lenar to check ()
+    date = models.DateField(default=datetime.today)
 
     class Meta:
         ordering = ("-date",)
