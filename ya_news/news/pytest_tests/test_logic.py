@@ -6,6 +6,11 @@ from news.forms import BAD_WORDS, WARNING
 from news.models import Comment
 
 
+EDIT_COMMENT_FORM_DATA = {
+    "text": "Новый текст",
+}
+
+
 def test_anonymous_user_cant_create_comment(
         comment_form_data,
         detail_url,
@@ -53,12 +58,12 @@ def test_user_cant_delete_comment_of_another_user(
 
 
 def test_author_can_edit_comment(
-    edit_url, detail_url, comment, edit_comment_form_data, author_client
+    edit_url, detail_url, comment, author_client
 ):
-    response = author_client.post(edit_url, data=edit_comment_form_data)
+    response = author_client.post(edit_url, data=EDIT_COMMENT_FORM_DATA)
     assertRedirects(response, detail_url + "#comments")
     comment.refresh_from_db()
-    assert comment.text == edit_comment_form_data['text']
+    assert comment.text == EDIT_COMMENT_FORM_DATA['text']
 
 
 def test_user_cant_edit_comment_of_another_user(

@@ -16,8 +16,8 @@ class TestNoteCreation(CommonTestFunctionality):
 
     def test_user_can_create_note(self):
         initial_notes_count = self.count_notes()
-        responce = self.author_client.post(ADD_URL, self.data_for_db)
-        self.assertRedirects(responce, SUCCESS_URL)
+        response = self.author_client.post(ADD_URL, self.data_for_db)
+        self.assertRedirects(response, SUCCESS_URL)
         notes_count = self.count_notes()
         self.assertEqual(notes_count, initial_notes_count + 1)
 
@@ -30,18 +30,18 @@ class TestNoteCreation(CommonTestFunctionality):
     def test_anonymous_user_cant_create_note(self):
         initial_notes_count = self.count_notes()
         redirect_url = f"{self.LOGIN_URL}?next={ADD_URL}"
-        responce = self.client.post(ADD_URL, self.data_for_db)
+        response = self.client.post(ADD_URL, self.data_for_db)
         notes_count = self.count_notes()
-        self.assertEqual(notes_count, initial_notes_count + 0)
-        self.assertRedirects(responce, redirect_url)
+        self.assertEqual(notes_count, initial_notes_count)
+        self.assertRedirects(response, redirect_url)
 
     def test_empty_slug(self):
         self.data_for_db.pop('slug')
         initial_notes_count = self.count_notes()
-        responce = self.author_client.post(
+        response = self.author_client.post(
             ADD_URL, data=self.data_for_db
         )
-        self.assertRedirects(responce, SUCCESS_URL)
+        self.assertRedirects(response, SUCCESS_URL)
         notes_count = self.count_notes()
         self.assertEqual(notes_count, initial_notes_count + 1)
 
@@ -52,12 +52,21 @@ class TestNoteCreation(CommonTestFunctionality):
 
     def test_not_unique_slug(self):
         self.data_for_db["slug"] = self.notes.slug
+        initial_notes_count = self.count_notes()
         response = self.author_client.post(ADD_URL, self.data_for_db)
         self.assertFormError(
             response, form="form",
             field="slug",
             errors=self.notes.slug + WARNING
         )
+        notes_count = self.count_notes()
+        self.assertEqual(notes_count, initial_notes_count)
+
+        note = self.get_filtered_note()
+        self.assertEqual(note.title, self.notes.title)
+        self.assertEqual(note.text, self.notes.text)
+        self.assertEqual(note.slug, self.notes.slug)
+        self.assertEqual(note.author, self.author)
 
 
 class TestNoteEditDelete(CommonTestFunctionality):

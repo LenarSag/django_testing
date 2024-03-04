@@ -73,13 +73,6 @@ def comment_form_data(author, news):
 
 
 @pytest.fixture
-def edit_comment_form_data(author, news):
-    return {
-        "text": "Новый текст",
-    }
-
-
-@pytest.fixture
 def letters_list():
     # создаем список заголовков из англ букв A...Z, AA...AZ..
     letters = [
